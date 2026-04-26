@@ -15,6 +15,17 @@ The V1 implementation keeps the surface compact but complete:
 - alert rules convert metric movement into healthy, warning, or critical incidents
 - a reporting layer writes both machine-readable JSON and a public-facing Markdown incident summary
 
+## Monitoring Signals
+
+The important metrics are intentionally explainable:
+
+- `PSI` highlights whether a feature distribution has shifted enough to deserve attention.
+- `KS` compares the shape of the reference and current distributions.
+- `KL divergence` helps describe how surprising the current distribution is relative to the baseline.
+- mean shift and outcome deltas explain whether the model is degrading even when the distribution change is not dramatic on its own.
+
+These signals are combined into an alert policy instead of being presented as isolated statistics.
+
 ```mermaid
 flowchart LR
     A["Deterministic window simulator"] --> B["reference_window.csv"]
@@ -69,6 +80,19 @@ That produces:
 - `generated/monitoring_summary.json`
 - `generated/incident_report.md`
 
+Example dashboard-style snapshot:
+
+```text
+severity: critical
+top_feature_drift: prediction_latency_ms (PSI 2.0372)
+prediction_shift: KS 0.6170
+reference_default_rate: 0.0885
+current_default_rate: 0.2805
+reference_log_loss: 0.2889
+current_log_loss: 0.5905
+action: investigate data shift and model decay before the next deployment
+```
+
 ### Run the Full Quality Gate
 
 ```bash
@@ -83,6 +107,8 @@ The V1 repo currently verifies:
 - feature drift alerts for the shifted current window
 - prediction-distribution shift and delayed-outcome quality comparison
 - a machine-readable summary and incident-style Markdown report produced from the same metrics
+
+The report is artifact-first on purpose, so a reviewer can inspect the JSON, the Markdown summary, and the generated rows without needing a live dashboard.
 
 Current expected report snapshot:
 
