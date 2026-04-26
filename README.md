@@ -14,6 +14,7 @@ The V1 implementation keeps the surface compact but complete:
 - monitoring logic computes per-feature PSI, prediction-distribution shift, and outcome-quality deltas
 - alert rules convert metric movement into healthy, warning, or critical incidents
 - a reporting layer writes both machine-readable JSON and a public-facing Markdown incident summary
+- a read-only FastAPI surface serves the current summary and report for Render or local inspection
 
 ## Monitoring Signals
 
@@ -99,6 +100,24 @@ action: investigate data shift and model decay before the next deployment
 make verify
 ```
 
+### Serve the Monitoring API
+
+```bash
+make serve
+```
+
+By default the server binds to `0.0.0.0:8000`. Override the port the same way Render does:
+
+```bash
+PORT=10000 make serve
+```
+
+The read-only API exposes:
+
+- `GET /health`
+- `GET /summary`
+- `GET /report`
+
 ## Validation
 
 The V1 repo currently verifies:
@@ -107,6 +126,7 @@ The V1 repo currently verifies:
 - feature drift alerts for the shifted current window
 - prediction-distribution shift and delayed-outcome quality comparison
 - a machine-readable summary and incident-style Markdown report produced from the same metrics
+- a read-only FastAPI hosting surface that reuses the same summary/report logic
 
 The report is artifact-first on purpose, so a reviewer can inspect the JSON, the Markdown summary, and the generated rows without needing a live dashboard.
 
@@ -124,7 +144,16 @@ Local quality gates:
 - `make lint`
 - `make test`
 - `make report`
+- `make serve`
 - `make verify`
+
+### Render Deployment
+
+Render can deploy this repo as a web service with:
+
+- build command: `python3 -m pip install -r requirements.txt`
+- start command: `make serve`
+- port: Render injects `PORT`, which `make serve` respects
 
 ## Next Steps
 

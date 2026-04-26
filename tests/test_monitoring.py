@@ -1,4 +1,7 @@
+from fastapi.testclient import TestClient
+
 from app.monitoring import build_monitoring_summary, compute_feature_drift
+from app.web import app
 from app.simulation import simulate_datasets
 
 
@@ -35,3 +38,24 @@ def test_monitoring_summary_emits_incident_alerts() -> None:
     assert summary.performance.status in {"warning", "critical"}
     assert summary.alerts
     assert "log loss changed" in summary.summary
+
+
+def test_read_only_api_exposes_summary_and_report() -> None:
+    client = TestClient(app)
+
+    health_response = client.get("/health")
+    summary_response = client.get("/summary")
+    report_response = client.get("/report")
+
+    assert health_response.status_code == 200
+    assert health_response.json() == {"status": "ok"}
+
+    assert summary_response.status_code == 200
+    payload = summary_response.json()
+    assert payload["overall_status"] == "critical"
+    assert payload["prediction_drift"]["status"] in {"warning", "critical"}
+    assert payload["alerts"]
+
+    assert report_response.status_code == 200
+    assert "Monitoring Incident Report" in report_response.text
+    assert "Overall status" in report_response.text
