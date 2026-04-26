@@ -47,7 +47,7 @@ flowchart LR
 This V1 makes three deliberate tradeoffs:
 
 1. The repo uses deterministic synthetic monitoring windows instead of a streaming source so the entire workflow remains reproducible offline.
-2. Drift detection is implemented with transparent custom metrics rather than a larger monitoring platform dependency because interview clarity matters more than framework breadth in the first version.
+2. Drift detection is implemented with transparent custom metrics rather than a larger monitoring platform dependency so the monitoring logic stays inspectable and reproducible in the first version.
 3. Reporting is artifact-driven JSON plus Markdown instead of a live dashboard so the quality gate stays scriptable and easy to verify locally.
 
 ## Run Steps
@@ -167,9 +167,9 @@ Render can deploy this repo as a web service with:
 - Render service config: Python web service on `main`, auto-deploy on commit, region `oregon`, plan `free`, build `python3 -m pip install -r requirements.txt`, start `make serve`, health check `/health`.
 - Render deploy command: `render deploys create srv-d7n659gsfn5c73dsss6g --confirm`
 
-## Next Steps
+## Future Expansion
 
-Realistic next follow-up work:
+Possible follow-on work outside the current shipped scope:
 
 1. add rolling daily windows instead of a single current snapshot
 2. model missing-label lag explicitly and split leading versus lagging alerts
