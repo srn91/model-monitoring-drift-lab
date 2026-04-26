@@ -50,11 +50,27 @@ class Alert:
 
 
 @dataclass
+class DailyWindowSummary:
+    monitoring_date: str
+    rows: int
+    overall_status: str
+    strongest_feature: str
+    strongest_feature_psi: float
+    prediction_ks_statistic: float
+    current_default_rate: float
+    log_loss: float
+    log_loss_delta: float
+
+
+@dataclass
 class MonitoringSummary:
     incident_id: str
     overall_status: str
     reference_rows: int
     current_rows: int
+    latest_window_date: str
+    rolling_window_days: int
+    rolling_daily_windows: list[DailyWindowSummary]
     feature_drift: list[FeatureDriftMetric]
     prediction_drift: PredictionDriftMetric
     performance: PerformanceComparison

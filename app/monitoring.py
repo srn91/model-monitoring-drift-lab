@@ -1,7 +1,18 @@
+from __future__ import annotations
+
 import math
 from statistics import mean
 
-from app.models import Alert, FeatureDriftMetric, MonitoringSummary, PerformanceComparison, PerformanceWindowMetric, PredictionDriftMetric
+from app.models import (
+    Alert,
+    DailyWindowSummary,
+    FeatureDriftMetric,
+    MonitoringSummary,
+    PerformanceComparison,
+    PerformanceWindowMetric,
+    PredictionDriftMetric,
+)
+from app.simulation import split_rolling_windows
 
 FEATURES = [
     "credit_utilization",
@@ -40,8 +51,8 @@ def population_stability_index(reference_values: list[float], current_values: li
     current_counts = _bin_counts(current_values, edges)
     epsilon = 1e-6
     psi = 0.0
-    total_reference = len(reference_counts) and len(reference_values)
-    total_current = len(current_counts) and len(current_values)
+    total_reference = len(reference_values)
+    total_current = len(current_values)
     for reference_count, current_count in zip(reference_counts, current_counts):
         reference_ratio = max(reference_count / total_reference, epsilon)
         current_ratio = max(current_count / total_current, epsilon)
@@ -143,13 +154,13 @@ def _performance_window(rows: list[dict[str, float | int | str]]) -> Performance
     probabilities = _extract(rows, "predicted_default_risk")
     labels = [int(row["actual_default"]) for row in rows]
     predictions = [int(probability >= 0.5) for probability in probabilities]
-    accuracy = sum(int(prediction == label) for prediction, label in zip(predictions, labels)) / len(labels)
+    accuracy = sum(int(prediction == label) for prediction, label in zip(predictions, labels, strict=True)) / len(labels)
     positive_rate = sum(labels) / len(labels)
-    brier_score = sum((probability - label) ** 2 for probability, label in zip(probabilities, labels)) / len(labels)
+    brier_score = sum((probability - label) ** 2 for probability, label in zip(probabilities, labels, strict=True)) / len(labels)
     log_loss = -sum(
         label * math.log(_safe_probability(probability))
         + (1 - label) * math.log(_safe_probability(1 - probability))
-        for probability, label in zip(probabilities, labels)
+        for probability, label in zip(probabilities, labels, strict=True)
     ) / len(labels)
     return PerformanceWindowMetric(
         accuracy=round(accuracy, 4),
@@ -243,10 +254,33 @@ def _summary_text(feature_metrics: list[FeatureDriftMetric], prediction_metric: 
     )
 
 
-def build_monitoring_summary(reference_rows: list[dict[str, float | int | str]], current_rows: list[dict[str, float | int | str]]) -> MonitoringSummary:
-    feature_metrics = compute_feature_drift(reference_rows, current_rows)
-    prediction_metric = compute_prediction_drift(reference_rows, current_rows)
-    performance = compute_performance(reference_rows, current_rows)
+def _build_daily_summary(reference_rows: list[dict[str, float | int | str]], monitoring_date: str, rows: list[dict[str, float | int | str]]) -> DailyWindowSummary:
+    feature_metrics = compute_feature_drift(reference_rows, rows)
+    prediction_metric = compute_prediction_drift(reference_rows, rows)
+    performance = compute_performance(reference_rows, rows)
+    alerts = build_alerts(feature_metrics, prediction_metric, performance)
+    strongest_feature = max(feature_metrics, key=lambda metric: metric.population_stability_index)
+    return DailyWindowSummary(
+        monitoring_date=monitoring_date,
+        rows=len(rows),
+        overall_status=_overall_status(alerts),
+        strongest_feature=strongest_feature.name,
+        strongest_feature_psi=strongest_feature.population_stability_index,
+        prediction_ks_statistic=prediction_metric.ks_statistic,
+        current_default_rate=performance.current.positive_rate,
+        log_loss=performance.current.log_loss,
+        log_loss_delta=performance.log_loss_delta,
+    )
+
+
+def build_monitoring_summary(reference_rows: list[dict[str, float | int | str]], rolling_rows: list[dict[str, float | int | str]]) -> MonitoringSummary:
+    rolling_windows = split_rolling_windows(rolling_rows)
+    daily_summaries = [_build_daily_summary(reference_rows, monitoring_date, rows) for monitoring_date, rows in rolling_windows]
+    latest_window_date, latest_rows = rolling_windows[-1]
+
+    feature_metrics = compute_feature_drift(reference_rows, latest_rows)
+    prediction_metric = compute_prediction_drift(reference_rows, latest_rows)
+    performance = compute_performance(reference_rows, latest_rows)
     alerts = build_alerts(feature_metrics, prediction_metric, performance)
     overall_status = _overall_status(alerts)
 
@@ -255,12 +289,17 @@ def build_monitoring_summary(reference_rows: list[dict[str, float | int | str]],
         "Review score calibration and threshold policy before retraining or rollback decisions.",
         "Compare the current window against the latest labeled slice to confirm whether degradation is persistent.",
     ]
+    if len(daily_summaries) >= 2 and daily_summaries[-1].log_loss_delta > daily_summaries[-2].log_loss_delta:
+        recommended_actions.insert(0, "Escalate the latest drift window because log-loss degradation is still worsening day over day.")
 
     return MonitoringSummary(
         incident_id="mdl-monitoring-2026-04-26",
         overall_status=overall_status,
         reference_rows=len(reference_rows),
-        current_rows=len(current_rows),
+        current_rows=len(rolling_rows),
+        latest_window_date=latest_window_date,
+        rolling_window_days=len(daily_summaries),
+        rolling_daily_windows=daily_summaries,
         feature_drift=feature_metrics,
         prediction_drift=prediction_metric,
         performance=performance,

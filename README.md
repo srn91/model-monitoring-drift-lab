@@ -1,6 +1,6 @@
 # model-monitoring-drift-lab
 
-A local-first ML monitoring lab that simulates a healthy reference window and a degraded current window, measures feature and prediction drift, evaluates delayed-outcome quality, and produces an incident-style monitoring report.
+A local-first ML monitoring lab that simulates a healthy reference window and a rolling sequence of degraded daily windows, measures feature and prediction drift, evaluates delayed-outcome quality, and produces an incident-style monitoring report.
 
 ## Problem
 
@@ -10,7 +10,7 @@ Training and serving are not enough for a credible ML system. Once a model is li
 
 The V1 implementation keeps the surface compact but complete:
 
-- a deterministic simulator writes reference and current prediction windows with delayed outcomes
+- a deterministic simulator writes a stable reference window plus rolling daily monitoring windows with delayed outcomes
 - monitoring logic computes per-feature PSI, prediction-distribution shift, and outcome-quality deltas
 - alert rules convert metric movement into healthy, warning, or critical incidents
 - a reporting layer writes both machine-readable JSON and a public-facing Markdown incident summary
@@ -31,7 +31,7 @@ These signals are combined into an alert policy instead of being presented as is
 ```mermaid
 flowchart LR
     A["Deterministic window simulator"] --> B["reference_window.csv"]
-    A --> C["current_window.csv"]
+    A --> C["rolling_daily_windows.csv"]
     B --> D["Drift metrics (PSI / KS / mean shift)"]
     C --> D
     B --> E["Outcome quality comparison"]
@@ -69,7 +69,7 @@ make simulate
 That produces:
 
 - `generated/reference_window.csv`
-- `generated/current_window.csv`
+- `generated/rolling_daily_windows.csv`
 
 ### Generate the Monitoring Report
 
@@ -124,8 +124,8 @@ The read-only API exposes:
 
 The V1 repo currently verifies:
 
-- deterministic generation of 2,000 reference rows and 2,000 current rows
-- feature drift alerts for the shifted current window
+- deterministic generation of 2,000 reference rows and 5 rolling daily monitoring windows
+- feature drift alerts for the latest degraded window plus rolling daily summaries
 - prediction-distribution shift and delayed-outcome quality comparison
 - a machine-readable summary and incident-style Markdown report produced from the same metrics
 - a browser-friendly HTML dashboard artifact produced from the same metrics
@@ -142,6 +142,7 @@ Current expected report snapshot:
 - reference log loss: `0.2889`; current log loss: `0.5905`
 - incident report and JSON summary both emitted under `generated/`
 - HTML dashboard emitted under `generated/monitoring_dashboard.html`
+- monitoring summary includes `latest_window_date`, `rolling_window_days`, and per-day status snapshots
 
 Local quality gates:
 
@@ -171,8 +172,7 @@ Render can deploy this repo as a web service with:
 
 Possible follow-on work outside the current shipped scope:
 
-1. add rolling daily windows instead of a single current snapshot
-2. model missing-label lag explicitly and split leading versus lagging alerts
-3. keep the HTML dashboard artifact in sync with the JSON summary and incident report
-4. compare champion and challenger model versions in the same report
-5. connect the simulator contract to a warehouse or feature-store export format
+1. model missing-label lag explicitly and split leading versus lagging alerts
+2. keep the HTML dashboard artifact in sync with the JSON summary and incident report
+3. compare champion and challenger model versions in the same report
+4. connect the simulator contract to a warehouse or feature-store export format

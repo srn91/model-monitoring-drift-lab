@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse
 
-from app.config import CURRENT_PATH, REFERENCE_PATH
+from app.config import REFERENCE_PATH, ROLLING_PATH
 from app.monitoring import build_monitoring_summary
 from app.reporting import render_markdown
 from app.simulation import read_rows, simulate_datasets
@@ -14,8 +14,8 @@ app = FastAPI(
 
 
 def _load_current_rows() -> tuple[list[dict[str, float | int | str]], list[dict[str, float | int | str]]]:
-    if REFERENCE_PATH.exists() and CURRENT_PATH.exists():
-        return read_rows(REFERENCE_PATH), read_rows(CURRENT_PATH)
+    if REFERENCE_PATH.exists() and ROLLING_PATH.exists():
+        return read_rows(REFERENCE_PATH), read_rows(ROLLING_PATH)
     return simulate_datasets()
 
 

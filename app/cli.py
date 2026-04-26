@@ -4,16 +4,16 @@ from app.simulation import persist_simulation, read_rows
 
 
 def simulate() -> None:
-    reference_path, current_path = persist_simulation()
+    reference_path, rolling_path = persist_simulation()
     print(f"wrote {reference_path}")
-    print(f"wrote {current_path}")
+    print(f"wrote {rolling_path}")
 
 
 def report() -> None:
-    reference_path, current_path = persist_simulation()
+    reference_path, rolling_path = persist_simulation()
     reference_rows = read_rows(reference_path)
-    current_rows = read_rows(current_path)
-    summary = build_monitoring_summary(reference_rows, current_rows)
+    rolling_rows = read_rows(rolling_path)
+    summary = build_monitoring_summary(reference_rows, rolling_rows)
     summary_path, report_path, dashboard_path = write_outputs(summary)
     print(f"overall_status={summary.overall_status}")
     print(f"summary_path={summary_path}")
