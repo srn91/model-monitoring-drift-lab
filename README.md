@@ -42,7 +42,7 @@ This V1 makes three deliberate tradeoffs:
 ### Install Dependencies
 
 ```bash
-git clone git@github.com:srn91/model-monitoring-drift-lab.git
+git clone https://github.com/srn91/model-monitoring-drift-lab.git
 cd model-monitoring-drift-lab
 python3 -m pip install -r requirements.txt
 ```
