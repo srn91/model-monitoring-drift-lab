@@ -8,7 +8,7 @@ Training and serving are not enough for a credible ML system. Once a model is li
 
 ## Architecture
 
-The V1 implementation keeps the surface compact but complete:
+The implementation keeps the surface compact but complete:
 
 - a deterministic simulator writes a stable reference window plus rolling daily monitoring windows with delayed outcomes
 - monitoring logic computes per-feature PSI, prediction-distribution shift, and outcome-quality deltas
@@ -44,7 +44,7 @@ flowchart LR
 
 ## Tradeoffs
 
-This V1 makes three deliberate tradeoffs:
+This implementation makes three deliberate tradeoffs:
 
 1. The repo uses deterministic synthetic monitoring windows instead of a streaming source so the entire workflow remains reproducible offline.
 2. Drift detection is implemented with transparent custom metrics rather than a larger monitoring platform dependency so the monitoring logic stays inspectable and reproducible in the first version.
@@ -122,7 +122,7 @@ The read-only API exposes:
 
 ## Validation
 
-The V1 repo currently verifies:
+The repo currently verifies:
 
 - deterministic generation of 2,000 reference rows and 5 rolling daily monitoring windows
 - feature drift alerts for the latest degraded window plus rolling daily summaries
@@ -131,7 +131,7 @@ The V1 repo currently verifies:
 - a browser-friendly HTML dashboard artifact produced from the same metrics
 - a read-only FastAPI hosting surface that reuses the same summary/report logic
 
-The report is artifact-first on purpose, so a reviewer can inspect the JSON, the Markdown summary, and the generated rows without needing a live dashboard.
+The report is artifact-first, so the JSON, the Markdown summary, and the generated rows can be inspected without needing a live dashboard.
 
 Current expected report snapshot:
 
