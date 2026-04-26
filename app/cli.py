@@ -14,10 +14,11 @@ def report() -> None:
     reference_rows = read_rows(reference_path)
     current_rows = read_rows(current_path)
     summary = build_monitoring_summary(reference_rows, current_rows)
-    summary_path, report_path = write_outputs(summary)
+    summary_path, report_path, dashboard_path = write_outputs(summary)
     print(f"overall_status={summary.overall_status}")
     print(f"summary_path={summary_path}")
     print(f"report_path={report_path}")
+    print(f"dashboard_path={dashboard_path}")
 
 
 def main() -> None:

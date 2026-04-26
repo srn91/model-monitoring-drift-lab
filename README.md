@@ -14,6 +14,7 @@ The V1 implementation keeps the surface compact but complete:
 - monitoring logic computes per-feature PSI, prediction-distribution shift, and outcome-quality deltas
 - alert rules convert metric movement into healthy, warning, or critical incidents
 - a reporting layer writes both machine-readable JSON and a public-facing Markdown incident summary
+- an HTML dashboard artifact layers a browser-friendly view on top of the same JSON summary and Markdown report
 - a read-only FastAPI surface serves the current summary and report for Render or local inspection
 
 ## Monitoring Signals
@@ -80,6 +81,7 @@ That produces:
 
 - `generated/monitoring_summary.json`
 - `generated/incident_report.md`
+- `generated/monitoring_dashboard.html`
 
 Example dashboard-style snapshot:
 
@@ -126,6 +128,7 @@ The V1 repo currently verifies:
 - feature drift alerts for the shifted current window
 - prediction-distribution shift and delayed-outcome quality comparison
 - a machine-readable summary and incident-style Markdown report produced from the same metrics
+- a browser-friendly HTML dashboard artifact produced from the same metrics
 - a read-only FastAPI hosting surface that reuses the same summary/report logic
 
 The report is artifact-first on purpose, so a reviewer can inspect the JSON, the Markdown summary, and the generated rows without needing a live dashboard.
@@ -138,6 +141,7 @@ Current expected report snapshot:
 - reference default rate: `0.0885`; current default rate: `0.2805`
 - reference log loss: `0.2889`; current log loss: `0.5905`
 - incident report and JSON summary both emitted under `generated/`
+- HTML dashboard emitted under `generated/monitoring_dashboard.html`
 
 Local quality gates:
 
@@ -169,6 +173,6 @@ Realistic next follow-up work:
 
 1. add rolling daily windows instead of a single current snapshot
 2. model missing-label lag explicitly and split leading versus lagging alerts
-3. emit an HTML dashboard artifact on top of the JSON summary
+3. keep the HTML dashboard artifact in sync with the JSON summary and incident report
 4. compare champion and challenger model versions in the same report
 5. connect the simulator contract to a warehouse or feature-store export format

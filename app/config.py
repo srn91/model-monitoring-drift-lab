@@ -7,6 +7,7 @@ REFERENCE_PATH = GENERATED_DIR / "reference_window.csv"
 CURRENT_PATH = GENERATED_DIR / "current_window.csv"
 SUMMARY_PATH = GENERATED_DIR / "monitoring_summary.json"
 REPORT_PATH = GENERATED_DIR / "incident_report.md"
+DASHBOARD_PATH = GENERATED_DIR / "monitoring_dashboard.html"
 
 REFERENCE_ROWS = 2_000
 CURRENT_ROWS = 2_000
