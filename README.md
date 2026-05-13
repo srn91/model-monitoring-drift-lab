@@ -17,7 +17,7 @@ A local-first ML monitoring lab that simulates a healthy reference window and a 
 - Model quality is monitored after deployment, not just during training.
 - Drift, prediction shift, delayed outcomes, and incident summaries are connected in one operational workflow.
 - The repo shows how alert thresholds become an investigation path for data scientists, MLOps engineers, and platform teams.
-- The evidence maps directly to MLOps, Model Reliability, AI Platform, and ML monitoring roles.
+- The implementation connects drift metrics, delayed outcomes, prediction shift, and incident reports in one monitoring workflow.
 
 ## Problem
 
