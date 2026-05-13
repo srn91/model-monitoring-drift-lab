@@ -2,9 +2,9 @@
 
 A local-first ML monitoring lab that simulates a healthy reference window and a rolling sequence of degraded daily windows, measures feature and prediction drift, evaluates delayed-outcome quality, and produces an incident-style monitoring report.
 
-## Proof Snapshot
+## Results
 
-| Signal | Current evidence |
+| Area | Details |
 |---|---|
 | Monitoring scale | The simulator generates `2,000` reference rows and `5` rolling daily monitoring windows with delayed outcomes. |
 | Drift severity | Current expected report flags overall severity as `critical`, with strongest PSI feature `prediction_latency_ms` at `2.0372`. |
@@ -12,7 +12,7 @@ A local-first ML monitoring lab that simulates a healthy reference window and a 
 | Outcome degradation | Reference log loss moves from `0.2889` to `0.5905`; default rate moves from `0.0885` to `0.2805`. |
 | Operational artifacts | The same metrics emit `monitoring_summary.json`, `incident_report.md`, `monitoring_dashboard.html`, and read-only API endpoints. |
 
-## What This Proves
+## Overview
 
 - Model quality is monitored after deployment, not just during training.
 - Drift, prediction shift, delayed outcomes, and incident summaries are connected in one operational workflow.
