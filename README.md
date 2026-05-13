@@ -2,6 +2,23 @@
 
 A local-first ML monitoring lab that simulates a healthy reference window and a rolling sequence of degraded daily windows, measures feature and prediction drift, evaluates delayed-outcome quality, and produces an incident-style monitoring report.
 
+## Proof Snapshot
+
+| Signal | Current evidence |
+|---|---|
+| Monitoring scale | The simulator generates `2,000` reference rows and `5` rolling daily monitoring windows with delayed outcomes. |
+| Drift severity | Current expected report flags overall severity as `critical`, with strongest PSI feature `prediction_latency_ms` at `2.0372`. |
+| Distribution shift | Prediction KS statistic is `0.6170`, making the prediction-behavior shift visible instead of relying only on raw feature checks. |
+| Outcome degradation | Reference log loss moves from `0.2889` to `0.5905`; default rate moves from `0.0885` to `0.2805`. |
+| Operational artifacts | The same metrics emit `monitoring_summary.json`, `incident_report.md`, `monitoring_dashboard.html`, and read-only API endpoints. |
+
+## What This Proves
+
+- Model quality is monitored after deployment, not just during training.
+- Drift, prediction shift, delayed outcomes, and incident summaries are connected in one operational workflow.
+- The repo shows how alert thresholds become an investigation path for data scientists, MLOps engineers, and platform teams.
+- The evidence maps directly to MLOps, Model Reliability, AI Platform, and ML monitoring roles.
+
 ## Problem
 
 Training and serving are not enough for a credible ML system. Once a model is live, teams need a disciplined way to detect whether input features have shifted, prediction behavior has changed, and downstream quality has degraded after labels arrive. This repo focuses on that post-deployment monitoring path.
