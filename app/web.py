@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse
 
 from app.config import REFERENCE_PATH, ROLLING_PATH
 from app.monitoring import build_monitoring_summary
@@ -33,19 +33,26 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.get("/")
-def index() -> dict[str, object]:
+@app.get("/", response_class=HTMLResponse)
+def index() -> str:
     summary = build_current_summary()
-    return {
-        "project": "model-monitoring-drift-lab",
-        "status": summary.overall_status,
-        "endpoints": {
-            "health": "/health",
-            "summary": "/summary",
-            "report": "/report",
-            "docs": "/docs",
-        },
-    }
+    return f"""<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Model Monitoring Drift Lab</title>
+<style>body{{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;max-width:860px;margin:48px auto;padding:0 24px;line-height:1.5;color:#111}}a{{color:#0645ad}}</style></head>
+<body>
+<h1>Model Monitoring Drift Lab</h1>
+<p>Monitoring service for feature drift, prediction shift, delayed-outcome quality, and incident-style reporting.</p>
+<ul><li>Current status: {summary.overall_status}</li><li>Reference rows: {summary.reference_rows}</li><li>Current rows: {summary.current_rows}</li></ul>
+<h2>Open endpoints</h2>
+<ul>
+<li><a href="/summary">Monitoring summary</a></li>
+<li><a href="/report">Incident report</a></li>
+<li><a href="/health">Health check</a></li>
+<li><a href="/docs">API docs</a></li>
+</ul>
+</body></html>"""
 
 
 @app.get("/summary")

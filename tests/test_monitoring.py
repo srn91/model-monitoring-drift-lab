@@ -68,8 +68,9 @@ def test_read_only_api_exposes_summary_and_report() -> None:
     report_response = client.get("/report")
 
     assert index_response.status_code == 200
-    assert index_response.json()["project"] == "model-monitoring-drift-lab"
-    assert index_response.json()["endpoints"]["summary"] == "/summary"
+    assert "text/html" in index_response.headers["content-type"]
+    assert "Model Monitoring Drift Lab" in index_response.text
+    assert "/summary" in index_response.text
 
     assert health_response.status_code == 200
     assert health_response.json() == {"status": "ok"}
