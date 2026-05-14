@@ -33,6 +33,21 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
+@app.get("/")
+def index() -> dict[str, object]:
+    summary = build_current_summary()
+    return {
+        "project": "model-monitoring-drift-lab",
+        "status": summary.overall_status,
+        "endpoints": {
+            "health": "/health",
+            "summary": "/summary",
+            "report": "/report",
+            "docs": "/docs",
+        },
+    }
+
+
 @app.get("/summary")
 def summary() -> dict:
     return build_current_summary().to_dict()

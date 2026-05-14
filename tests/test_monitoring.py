@@ -62,9 +62,14 @@ def test_report_outputs_html_dashboard(tmp_path, monkeypatch) -> None:
 def test_read_only_api_exposes_summary_and_report() -> None:
     client = TestClient(app)
 
+    index_response = client.get("/")
     health_response = client.get("/health")
     summary_response = client.get("/summary")
     report_response = client.get("/report")
+
+    assert index_response.status_code == 200
+    assert index_response.json()["project"] == "model-monitoring-drift-lab"
+    assert index_response.json()["endpoints"]["summary"] == "/summary"
 
     assert health_response.status_code == 200
     assert health_response.json() == {"status": "ok"}

@@ -179,8 +179,8 @@ Render can deploy this repo as a web service with:
 
 ## Hosted Deployment
 
-- Live URL: `https://model-monitoring-drift-lab.onrender.com`
-- Click first: [`/openapi.json`](https://model-monitoring-drift-lab.onrender.com/openapi.json)
+- Live API: [`/docs`](https://model-monitoring-drift-lab.onrender.com/docs)
+- Machine-readable summary: [`/summary`](https://model-monitoring-drift-lab.onrender.com/summary)
 - Browser smoke: Render-hosted `/openapi.json` loaded in a real browser and exposed the live `/health`, `/summary`, and `/report` contract; direct HTTP checks also returned `200` for `/summary` and `/health`.
 - Render service config: Python web service on `main`, auto-deploy on commit, region `oregon`, plan `free`, build `python3 -m pip install -r requirements.txt`, start `make serve`, health check `/health`.
 - Render deploy command: `render deploys create srv-d7n659gsfn5c73dsss6g --confirm`
