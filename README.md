@@ -2,6 +2,9 @@
 
 A local-first ML monitoring lab that simulates a healthy reference window and a rolling sequence of degraded daily windows, measures feature and prediction drift, evaluates delayed-outcome quality, and produces an incident-style monitoring report.
 
+**System type:** Production-style engineering system  
+**System brief:** [docs/system-brief.md](docs/system-brief.md)
+
 ## Results
 
 | Area | Details |
